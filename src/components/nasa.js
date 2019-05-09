@@ -1,65 +1,68 @@
 import React from 'react'
 import Axios from 'axios'
+import {getGeolocation} from '../actions'
+import {connect} from 'react-redux'
 
 
-function getLocation() {
-    if(navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(showPosition);
 
-    } else {
-        console.log('outta luck with location')
-    }
-};
-
-function showPosition(position) {
-  console.log(position.coords.latitude + " " + position.coords.longitude)
-  this.setState({
-      lat: position.coords.latitude,
-      lon: position.coords.longitude
-  })
-}
-
-
-class Nasa extends React.Component {
+export class Nasa extends React.Component {
     constructor(props) {
         super(props)
     this.state={
         info: [],
         lat: "",
-        lon: ""
+        lon: "",
+        type: ""
       }
 
-      this.showPosition = showPosition.bind(this)
+      
     
     }
+
+     
 
       componentDidMount(){
 
       
 
-      getLocation()
+      this.props.dispatch(getGeolocation())
         
 
         Axios.get('https://api.nasa.gov/planetary/apod?api_key=YGHEK5bZsp1smohueiTvyBMkBv83MRb5EcfyCsEs')
               .then(res=>{
+
+
                 this.setState({
-                  info: res.data
+                  info: res.data,
                 })
+
+              
                 console.log(this.state.info)
               })
               .catch(err =>{
                 console.log(err)
               })
       }
+      
 
     render(){
+
+       
         return(
             <div>
                 <p>I Made A Thing!</p>
-                <img src={this.state.info.hdurl} />
+                <img src={this.state.info.url} alt="big-space-picture" />
             </div>
         )
     }
 }
 
-export default Nasa
+const mapStateToProps = state =>({
+    info: state.infoReducer.info,
+    lat: state.infoReducer.lat,
+    lon: state.infoReducer.lon
+})
+
+const NewNasa = connect(mapStateToProps)(Nasa)
+
+export default NewNasa
